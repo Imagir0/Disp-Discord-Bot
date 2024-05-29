@@ -1,4 +1,5 @@
 const clear = require('./clear'); // Importer la fonction clear
+const { roleId, yesEmoji, noEmoji } = require('../config'); // Importer les variables de config.js
 
 module.exports = {
     name: 'disp',
@@ -6,9 +7,6 @@ module.exports = {
     async execute(message, args) {
         // Tableau des jours de la semaine
         const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-        const roleId = '1060276629047345352'; // Rôle à notifier
-        const yesEmoji = '<:yes:1060307378492428399>'; // emoji "yes"
-        const nopeEmoji = '<:nope:1060307465914290249>'; // emoji "nope"
 
         // Objet pour stocker les événements spéciaux
         const events = {};
@@ -40,7 +38,7 @@ module.exports = {
         }
 
         // Avant d'afficher les jours, on clean le salon
-        await clear.execute(message, ['7'], message.author); // Remplacez '7' par le nombre de messages à supprimer
+        await clear.execute(message, ['15'], message.author); // Remplacez '7' par le nombre de messages à supprimer
 
 
         // Envoyer le message initial avec retour à la ligne
@@ -51,7 +49,7 @@ module.exports = {
             const eventMessage = events[day] ? ` (${events[day]})` : '';
             await message.channel.send(`${day}${eventMessage}`).then(sentMessage => { 
                 sentMessage.react(yesEmoji);
-                sentMessage.react(nopeEmoji);
+                sentMessage.react(noEmoji);
             }); 
         }
     },

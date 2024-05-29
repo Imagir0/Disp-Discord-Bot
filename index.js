@@ -1,3 +1,4 @@
+require('dotenv').config();  // Charger les variables d'environnement à partir du fichier .env
 const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
@@ -55,6 +56,4 @@ client.on('messageCreate', message => {
 });
 
 // Lire le token du bot
-const tokenPath = path.join(__dirname, '../token.txt');
-const token = fs.readFileSync(tokenPath, 'utf-8').trim();
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);
