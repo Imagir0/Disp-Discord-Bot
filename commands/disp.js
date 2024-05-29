@@ -28,7 +28,7 @@ module.exports = {
 
             // Poser la question pour un événement spécial
             const filter = response => response.author.id === message.author.id;
-            const specialEventAnswer = await askQuestion(`Y a-t-il un événement spécial pour ${day} ?\nEntrez le nom, si oui / Sinon, mettez "non"`, filter);
+            const specialEventAnswer = await askQuestion(`Y a-t-il un événement ${day} ?\nEntrez l'heure - suivi du nom, sinon mettez "non"`, filter);
 
             if (specialEventAnswer != 'non') {
                 events[day] = specialEventAnswer;
