@@ -9,14 +9,8 @@ const client = new Client({
     ]
 });
 
-// Lire le token du bot
-const tokenPath = path.join(__dirname, '../token.txt');
-const token = fs.readFileSync(tokenPath, 'utf-8').trim();
-
-// Créez une collection pour les commandes
+// Créez une collection pour les commandes / 1 fichier = 1 commande
 client.commands = new Collection();
-
-// Chemin vers le dossier des commandes
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
@@ -52,7 +46,7 @@ client.on('messageCreate', message => {
 
     // Exécutez la commande
     try {
-        command.execute(message, args);
+        command.execute(message, args, message.author);
     } catch (error) {
         console.error(error);
         message.reply('Il y a eu une erreur en exécutant cette commande.');
@@ -60,4 +54,7 @@ client.on('messageCreate', message => {
 
 });
 
+// Lire le token du bot
+const tokenPath = path.join(__dirname, '../token.txt');
+const token = fs.readFileSync(tokenPath, 'utf-8').trim();
 client.login(token);
