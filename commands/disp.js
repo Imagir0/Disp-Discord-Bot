@@ -38,7 +38,7 @@ module.exports = {
         }
 
         // Avant d'afficher les jours, on clean le salon
-        await clear.execute(message, ['15'], message.author); // Remplacez '7' par le nombre de messages à supprimer
+        await clear.execute(message, ['15'], message.author); // Remplacez '15' par le nombre de messages à supprimer
 
 
         // Envoyer le message initial avec retour à la ligne
