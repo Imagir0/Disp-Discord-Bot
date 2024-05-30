@@ -6,7 +6,7 @@ const capitalizeFirstLetter = (string) => {
 
 module.exports = {
     name: 'modify',
-    description: 'Modifie un message spécifique envoyé par le bot qui contient un jour de la semaine donné.',
+    description: 'Modifie un évènement sur un jour de la semaine créé avec la fonction "!7disp".',
     async execute(message, args) {
         // Vérifier si un jour de la semaine a été fourni
         if (!args.length) {

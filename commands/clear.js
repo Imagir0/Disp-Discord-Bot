@@ -1,6 +1,6 @@
 module.exports = {
     name: 'clear',
-    description: 'Supprime un nombre spécifié de messages, y compris ceux d\'un utilisateur spécifique.',
+    description: 'Supprime un nombre spécifié de messages (100 par défaut/max).',
     async execute(message, args, user) {
         let amount = 100;
 

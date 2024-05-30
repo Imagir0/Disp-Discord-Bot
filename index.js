@@ -1,4 +1,5 @@
 require('dotenv').config();  // Charger les variables d'environnement à partir du fichier .env
+const config = require('./config.js');
 const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
@@ -37,17 +38,20 @@ client.on('messageCreate', message => {
     if (message.author.bot) return;
 
     // Vérifiez si le message commence par un préfixe
-    const prefix = '!7';
-    if (!message.content.startsWith(prefix)) return;
+    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
     // Extrayez la commande du message
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
     // Vérifiez si la commande existe
     if (!client.commands.has(commandName)) return;
 
     const command = client.commands.get(commandName);
+    
+    if (!command) {
+        return message.reply(`Commande inconnue. Tapez \`!7help\` pour voir la liste des commandes disponibles.`);
+    }
 
     // Exécutez la commande
     try {
