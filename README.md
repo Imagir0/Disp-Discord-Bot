@@ -38,7 +38,9 @@ Disp-Discord-Bot est un bot Discord qui permet aux utilisateurs de spécifier le
     DISCORD_TOKEN=your-discord-bot-token
     ```
 
-4. Structure du projet :
+4. Modifiez le fichier `config.js` pour ajuster les rôles mentionnés et emojis de présences.
+
+5. Structure du projet :
 
     Assurez-vous que votre projet est structuré comme suit :
 
@@ -56,8 +58,6 @@ Disp-Discord-Bot est un bot Discord qui permet aux utilisateurs de spécifier le
     ├── package.json
     └── README.md
     ```
-
-5. Modifiez le fichier `config.js` pour inclure les fonctionnalités/emojis/rôles souhaités.
 
 ## Utilisation
 
