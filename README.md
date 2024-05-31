@@ -6,9 +6,8 @@ Disp-Discord-Bot est un bot Discord qui permet aux utilisateurs de spécifier le
 
 ## Fonctionnalités
 
-- Envoyer les jours de la semaine pour que les utilisateurs puissent indiquer leurs disponibilités.
-- Poser des questions sur des événements spéciaux pour chaque jour de la semaine.
-- Ajouter des réactions aux messages pour indiquer des réponses simples (oui/non).
+- Envoyer les jours de la semaine pour que les utilisateurs puissent indiquer leurs disponibilités en fonction des évènements.
+- Gestion des réactions aux messages pour indiquer des présences (✅/❌).
 - Effacer les messages du canal, y compris ceux de l'utilisateur et du bot, avec une commande dédiée.
 
 ## Prérequis
@@ -46,8 +45,10 @@ Disp-Discord-Bot est un bot Discord qui permet aux utilisateurs de spécifier le
     ```
     votre-depot/
     ├── commands/
+    │   ├── clear.js
     │   ├── disp.js
-    │   └── clear.js
+    │   ├── help.js
+    │   └── modify.js
     ├── .env
     ├── .gitignore
     ├── config.js
@@ -68,5 +69,7 @@ Disp-Discord-Bot est un bot Discord qui permet aux utilisateurs de spécifier le
 
 2. Une fois le bot en ligne, utilisez les commandes suivantes dans votre serveur Discord :
 
-    - `!7disp` : Le bot demandera les disponibilités pour chaque jour de la semaine et posera des questions sur les événements spéciaux.
     - `!7clear` : Le bot supprimera par défaut les 100 messages les plus récents du canal, y compris ceux de l'utilisateur et du bot.
+    - `!7disp` : Le bot demandera les disponibilités pour chaque jour de la semaine et posera des questions sur les événements spéciaux.
+    - `!7help` : Le bot supprimera par défaut les 100 messages les plus récents du canal, y compris ceux de l'utilisateur et du bot.
+    - `!7modify` : Le bot supprimera par défaut les 100 messages les plus récents du canal, y compris ceux de l'utilisateur et du bot.
