@@ -1,8 +1,9 @@
 require('dotenv').config();  // Charger les variables d'environnement à partir du fichier .env
-const config = require('./config.js');
+const { yesEmoji, noEmoji, prefix, roleId, guildId, channelId, notifyHour, notifyMinute } = require('./config');
 const fs = require('fs');
 const path = require('path');
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const schedule = require('node-schedule');
+const { Client, GatewayIntentBits, Partials, EmbedBuilder, Collection } = require('discord.js');
 
 const client = new Client({
     intents: [
@@ -30,6 +31,74 @@ for (const file of commandFiles) {
 // Chargement du bot
 client.once('ready', () => {
     console.log('Le bot est en ligne !');
+
+    // Planifier la notification quotidienne
+    const job = schedule.scheduleJob({ hour: notifyHour, minute: notifyMinute }, async () => {
+        const guild = client.guilds.cache.get(guildId);
+        if (guild) {
+            const channel = guild.channels.cache.get(channelId);
+            if (channel) {
+
+                // Créer un message intégré
+                const embedMessage = new EmbedBuilder()
+                    .setColor('#ffffff') // Couleur de la barre latérale de l'embed
+                    .setTitle('Notification quotidienne')
+                    .setDescription(`Qui joue ce soir ?`);
+
+                // Envoyer l'embed dans le canal
+                const sentMessage = await channel.send({
+                    content: `<@&${roleId}>\n`, 
+                    embeds: [embedMessage]
+                });
+                await sentMessage.react(yesEmoji);
+                await sentMessage.react(noEmoji);
+
+                 // Fonction pour mettre à jour l'embed avec les noms des utilisateurs ayant réagi
+                const updateEmbed = async () => {
+                    const yesReaction = sentMessage.reactions.cache.get(yesEmoji);
+                    const noReaction = sentMessage.reactions.cache.get(noEmoji);
+
+                    if (!yesReaction || !noReaction) return;
+
+                    const fullYesReaction = await yesReaction.fetch();
+                    const fullNoReaction = await noReaction.fetch();
+
+                    const yesUsers = fullYesReaction.users.cache.filter(user => !user.bot).map(user => user.username).join(', ');
+                    const noUsers = fullNoReaction.users.cache.filter(user => !user.bot).map(user => user.username).join(', ');
+
+                    const updatedEmbed = new EmbedBuilder()
+                        .setColor('#ffffff')
+                        .setTitle('Notification quotidienne')
+                        .setDescription(`Qui joue ce soir ?`)
+                        .addFields(
+                            { name: 'Oui', value: yesUsers || 'Aucun', inline: true },
+                            { name: 'Non', value: noUsers || 'Aucun', inline: true }
+                        );
+
+                    await sentMessage.edit({ embeds: [updatedEmbed] });
+                };
+
+                // Event listeners pour les ajouts et suppressions de réactions
+                client.on('messageReactionAdd', async (reaction, user) => {
+                    if (reaction.message.id === sentMessage.id && !user.bot) {
+                        await updateEmbed();
+                    }
+                });
+
+                client.on('messageReactionRemove', async (reaction, user) => {
+                    if (reaction.message.id === sentMessage.id && !user.bot) {
+                        await updateEmbed();
+                    }
+                });
+
+            } else {
+                console.error('Canal introuvable.');
+            }
+        } else {
+            console.error('Guilde introuvable.');
+        }
+    });
+
 });
 
 client.on('messageCreate', message => {
@@ -38,10 +107,10 @@ client.on('messageCreate', message => {
     if (message.author.bot) return;
 
     // Vérifiez si le message commence par un préfixe
-    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
+    if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     // Extrayez la commande du message
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
     // Vérifiez si la commande existe
