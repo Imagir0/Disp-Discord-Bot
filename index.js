@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const schedule = require('node-schedule');
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, Collection } = require('discord.js');
+const { ping, handleReactionAdd, handleReactionRemove } = require('./functions/dailyPing');
 
 const client = new Client({
     intents: [
@@ -11,9 +12,9 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.GuildMembers
+        GatewayIntentBits.GuildMembers,
     ],
-    partials: [Partials.Message, Partials.Channel, Partials.Reaction]
+    partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.User]
 });
 
 // Créez une collection pour les commandes / 1 fichier = 1 commande
@@ -33,74 +34,11 @@ client.once('ready', () => {
     console.log('Le bot est en ligne !');
 
     // Planifier la notification quotidienne
-    const job = schedule.scheduleJob({ hour: notifyHour, minute: notifyMinute }, async () => {
-        const guild = client.guilds.cache.get(guildId);
-        if (guild) {
-            const channel = guild.channels.cache.get(channelId);
-            if (channel) {
-
-                // Créer un message intégré
-                const embedMessage = new EmbedBuilder()
-                    .setColor('#ffffff') // Couleur de la barre latérale de l'embed
-                    .setTitle('Notification quotidienne')
-                    .setDescription(`Qui joue ce soir ?`);
-
-                // Envoyer l'embed dans le canal
-                const sentMessage = await channel.send({
-                    content: `<@&${roleId}>\n`, 
-                    embeds: [embedMessage]
-                });
-                await sentMessage.react(yesEmoji);
-                await sentMessage.react(noEmoji);
-
-                 // Fonction pour mettre à jour l'embed avec les noms des utilisateurs ayant réagi
-                const updateEmbed = async () => {
-                    const yesReaction = sentMessage.reactions.cache.get(yesEmoji);
-                    const noReaction = sentMessage.reactions.cache.get(noEmoji);
-
-                    if (!yesReaction || !noReaction) return;
-
-                    const fullYesReaction = await yesReaction.fetch();
-                    const fullNoReaction = await noReaction.fetch();
-
-                    const yesUsers = fullYesReaction.users.cache.filter(user => !user.bot).map(user => user.username).join(', ');
-                    const noUsers = fullNoReaction.users.cache.filter(user => !user.bot).map(user => user.username).join(', ');
-
-                    const updatedEmbed = new EmbedBuilder()
-                        .setColor('#ffffff')
-                        .setTitle('Notification quotidienne')
-                        .setDescription(`Qui joue ce soir ?`)
-                        .addFields(
-                            { name: 'Oui', value: yesUsers || 'Aucun', inline: true },
-                            { name: 'Non', value: noUsers || 'Aucun', inline: true }
-                        );
-
-                    await sentMessage.edit({ embeds: [updatedEmbed] });
-                };
-
-                // Event listeners pour les ajouts et suppressions de réactions
-                client.on('messageReactionAdd', async (reaction, user) => {
-                    if (reaction.message.id === sentMessage.id && !user.bot) {
-                        await updateEmbed();
-                    }
-                });
-
-                client.on('messageReactionRemove', async (reaction, user) => {
-                    if (reaction.message.id === sentMessage.id && !user.bot) {
-                        await updateEmbed();
-                    }
-                });
-
-            } else {
-                console.error('Canal introuvable.');
-            }
-        } else {
-            console.error('Guilde introuvable.');
-        }
-    });
+    ping(client, guildId, channelId, roleId, yesEmoji, noEmoji, notifyHour, notifyMinute);
 
 });
 
+// Commandes du bot
 client.on('messageCreate', message => {
 
     // Ignore messages from bots
@@ -132,52 +70,12 @@ client.on('messageCreate', message => {
 
 });
 
-client.on('messageReactionAdd', async (reaction, user) => {
-    if (user.bot) return; // Ignore bot reactions
-
-    // Fetch partial reactions or messages
-    if (reaction.partial) {
-        try {
-            await reaction.fetch();
-        } catch (error) {
-            console.error('Error fetching reaction:', error);
-            return;
-        }
-    }
-
-    const message = reaction.message;
-    if (message.author.id !== client.user.id) return; // Only handle reactions to bot messages
-
-    // Remove bot's reaction
-    const botReactions = message.reactions.cache.filter(r => r.users.cache.has(client.user.id));
-    for (const botReaction of botReactions.values()) {
-        if (botReaction.emoji.name === reaction.emoji.name) {
-            await botReaction.users.remove(client.user.id);
-        }
-    }
+client.on('messageReactionAdd', (reaction, user) => {
+    handleReactionAdd(reaction, user, client);
 });
 
-client.on('messageReactionRemove', async (reaction, user) => {
-    if (user.bot) return; // Ignore bot reactions
-
-    // Fetch partial reactions or messages
-    if (reaction.partial) {
-        try {
-            await reaction.fetch();
-        } catch (error) {
-            console.error('Error fetching reaction:', error);
-            return;
-        }
-    }
-
-    const message = reaction.message;
-    if (message.author.id !== client.user.id) return; // Only handle reactions to bot messages
-
-    // Re-add bot's reaction if no other user has reacted with that emoji
-    const users = await reaction.users.fetch();
-    if (!users.has(client.user.id)) {
-        await reaction.message.react(reaction.emoji);
-    }
+client.on('messageReactionRemove', (reaction, user) => {
+    handleReactionRemove(reaction, user, client);
 });
 
 // Lire le token du bot
