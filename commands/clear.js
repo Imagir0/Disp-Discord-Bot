@@ -13,7 +13,7 @@ module.exports = {
         }
 
         if (amount > 100) {
-            return message.reply('Vous pouvez supprimer jusqu\'à 100 messages à la fois.');
+            return message.reply('Vous ne pouvez supprimer que jusqu\'à 100 messages à la fois.');
         }
 
         try {

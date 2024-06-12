@@ -1,8 +1,10 @@
 require('dotenv').config();  // Charger les variables d'environnement à partir du fichier .env
-const config = require('./config.js');
+const { yesEmoji, noEmoji, prefix, roleId, guildId, channelId, notifyHour, notifyMinute } = require('./config');
 const fs = require('fs');
 const path = require('path');
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const schedule = require('node-schedule');
+const { Client, GatewayIntentBits, Partials, EmbedBuilder, Collection } = require('discord.js');
+const { ping, handleReactionAdd, handleReactionRemove } = require('./functions/dailyPing');
 
 const client = new Client({
     intents: [
@@ -10,9 +12,9 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.GuildMembers
+        GatewayIntentBits.GuildMembers,
     ],
-    partials: [Partials.Message, Partials.Channel, Partials.Reaction]
+    partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.User]
 });
 
 // Créez une collection pour les commandes / 1 fichier = 1 commande
@@ -30,18 +32,23 @@ for (const file of commandFiles) {
 // Chargement du bot
 client.once('ready', () => {
     console.log('Le bot est en ligne !');
+
+    // Planifier la notification quotidienne
+    ping(client, guildId, channelId, roleId, yesEmoji, noEmoji, notifyHour, notifyMinute);
+
 });
 
+// Commandes du bot
 client.on('messageCreate', message => {
 
     // Ignore messages from bots
     if (message.author.bot) return;
 
     // Vérifiez si le message commence par un préfixe
-    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
+    if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     // Extrayez la commande du message
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
     // Vérifiez si la commande existe
@@ -63,52 +70,12 @@ client.on('messageCreate', message => {
 
 });
 
-client.on('messageReactionAdd', async (reaction, user) => {
-    if (user.bot) return; // Ignore bot reactions
-
-    // Fetch partial reactions or messages
-    if (reaction.partial) {
-        try {
-            await reaction.fetch();
-        } catch (error) {
-            console.error('Error fetching reaction:', error);
-            return;
-        }
-    }
-
-    const message = reaction.message;
-    if (message.author.id !== client.user.id) return; // Only handle reactions to bot messages
-
-    // Remove bot's reaction
-    const botReactions = message.reactions.cache.filter(r => r.users.cache.has(client.user.id));
-    for (const botReaction of botReactions.values()) {
-        if (botReaction.emoji.name === reaction.emoji.name) {
-            await botReaction.users.remove(client.user.id);
-        }
-    }
+// Gestion des réactions pour le ping journalier
+client.on('messageReactionAdd', (reaction, user) => {
+    handleReactionAdd(reaction, user, client);
 });
-
-client.on('messageReactionRemove', async (reaction, user) => {
-    if (user.bot) return; // Ignore bot reactions
-
-    // Fetch partial reactions or messages
-    if (reaction.partial) {
-        try {
-            await reaction.fetch();
-        } catch (error) {
-            console.error('Error fetching reaction:', error);
-            return;
-        }
-    }
-
-    const message = reaction.message;
-    if (message.author.id !== client.user.id) return; // Only handle reactions to bot messages
-
-    // Re-add bot's reaction if no other user has reacted with that emoji
-    const users = await reaction.users.fetch();
-    if (!users.has(client.user.id)) {
-        await reaction.message.react(reaction.emoji);
-    }
+client.on('messageReactionRemove', (reaction, user) => {
+    handleReactionRemove(reaction, user, client);
 });
 
 // Lire le token du bot
