@@ -7,6 +7,6 @@ module.exports = {
     prefix: '!7', // Préfix pour déclancher les commandes
     guildId: '501441102784626728', // Id du serveur / Seven=> 1060276362432217168 / Nebuleuse=> 501441102784626728
     channelId: '502224196299128842', // Id du salon ou les pings journaliers sont effectués / Seven=> 1060279203859275886 / Nebuleuse=> 502224196299128842
-    notifyHour: 8, // Heure de la notification (24h format)
-    notifyMinute: 3 // Minute de la notification
+    notifyHour: 18, // Heure de la notification (24h format)
+    notifyMinute: 0 // Minute de la notification
 };

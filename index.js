@@ -70,10 +70,10 @@ client.on('messageCreate', message => {
 
 });
 
+// Gestion des réactions pour le ping journalier
 client.on('messageReactionAdd', (reaction, user) => {
     handleReactionAdd(reaction, user, client);
 });
-
 client.on('messageReactionRemove', (reaction, user) => {
     handleReactionRemove(reaction, user, client);
 });
