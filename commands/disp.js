@@ -17,7 +17,7 @@ module.exports = {
             const collected = await message.channel.awaitMessages({
                 filter,
                 max: 1,
-                time: 60000,
+                time: 120000,
                 errors: ['time']
             });
             return collected.first().content.toLowerCase();
