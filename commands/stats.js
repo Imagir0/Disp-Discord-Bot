@@ -28,7 +28,7 @@ module.exports = {
                         `> **Défaites :** ${stats[2]}\n` +
                         `> **Manches gagnées :** ${stats[3]}\n` +
                         `> **Manches perdues :** ${stats[4]}\n` +
-                        `> **Manches jouées :** ${Number(stats[3]) + Number(stats[4])}`
+                        `> **Manches jouées :** ${Number(stats[3]) + Number(stats[4])}\n` +
                         `> **% Victoires manches :** ${stats[6]}`,
                       inline: false,
                     },
