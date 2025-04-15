@@ -5,6 +5,7 @@ const path = require('path');
 const schedule = require('node-schedule');
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, Collection } = require('discord.js');
 const { ping, handleReactionAdd, handleReactionRemove } = require('./functions/dailyPing');
+const { getUserStats } = require('./functions/sheets');
 
 const client = new Client({
     intents: [
