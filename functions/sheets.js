@@ -10,31 +10,39 @@ const sheets = google.sheets({ version: 'v4', auth });
 
 const SPREADSHEET_ID = '1JcxiviVfcYPlIWBzVBOh3RAd0m0zgLcu0hV25KJMBYc';
 
-async function getUserStats(username) {
-  const range = 'Équipes!C4:V'; // C contient le nom, D à V les stats
-
-
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range,
-  });
-
-  const rows = res.data.values;
-  if (!rows || rows.length === 0) return null;
-
-  // Chercher la ligne contenant le nom du joueur
-  for (const row of rows) {
-    const playerName = row[0]?.toLowerCase().trim();
-    if (playerName === username.toLowerCase().trim()) {
-      // S'assurer que la ligne contient bien toutes les données attendues (jusqu'à V → 19 valeurs)
-      while (row.length < 19) {
-        row.push('—'); // Ajoute des tirets pour éviter les erreurs si des colonnes sont vides
-      }
-      return row;
+async function getStats(type, name) {
+    let range = '';
+    let nameColIndex = 0;
+  
+    if (type === 'équipe') {
+      range = 'Équipes!B4:AA';
+      nameColIndex = 1; // Colonne C = première colonne dans la plage
+    } else if (type === 'joueur') {
+      range = 'Joueurs!B5:AB';
+      nameColIndex = 2; // Colonne B = première colonne dans la plage
+    } else {
+      throw new Error('Type de statistique invalide.');
     }
+  
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range,
+    });
+  
+    const rows = res.data.values;
+    if (!rows || rows.length === 0) return null;
+  
+    for (const row of rows) {
+      const entityName = row[nameColIndex]?.toLowerCase().trim();
+      if (entityName === name.toLowerCase().trim()) {
+        while (row.length < 26) {
+          row.push('—');
+        }
+        return row;
+      }
+    }
+  
+    return null;
   }
-
-  return null; // Aucun joueur trouvé
-}
-
-module.exports = { getUserStats };
+  
+  module.exports = { getStats };
