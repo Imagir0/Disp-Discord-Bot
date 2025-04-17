@@ -16,10 +16,10 @@ async function getStats(type, name) {
   
     if (type === 'équipe') {
       range = 'Équipes!B4:AA';
-      nameColIndex = 1; // Colonne C = première colonne dans la plage
+      nameColIndex = 1; // Colonne C = nom des équipes
     } else if (type === 'joueur') {
-      range = 'Joueurs!B5:AB';
-      nameColIndex = 2; // Colonne B = première colonne dans la plage
+      range = 'Joueurs!B5:AC';
+      nameColIndex = 27; // Colonne AC = id Discord
     } else {
       throw new Error('Type de statistique invalide.');
     }
