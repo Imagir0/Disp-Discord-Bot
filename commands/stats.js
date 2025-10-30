@@ -18,26 +18,31 @@ module.exports = {
     name: 'stats',
     description: 'Renvoie les stats d\'un joueur ou d\'une équipe.',
     async execute(message, args) {
-        if (args.length < 2) {
-            return message.reply("Utilisation : `!7 stats joueur [nomJoueur]` ou `!7 stats équipe [nomÉquipe]`");
+        if (args.length < 3) {
+            return message.reply("Utilisation : `!7 stats [S4|S5] [joueur|équipe] [nom]`");
         }
 
-        const type = args[0].toLowerCase();
-        const name = args.slice(1).join(' '); // Pour les noms avec espaces
+        const saison = args[0].toUpperCase();
+        const type = args[1].toLowerCase();
+        const name = args.slice(2).join(' '); // Pour les noms avec espaces
+
+        if (!['s4', 's5'].includes(saison.toLowerCase())) {
+            return message.reply("Veuillez spécifier une saison valide (`S4` ou `S5`).");
+        }
 
         if (!['joueur', 'équipe'].includes(type)) {
-            return message.reply("Veuillez spécifier `joueur` ou `équipe` après `!7 stats`.");
+            return message.reply("Veuillez spécifier `joueur` ou `équipe` après la saison.");
         }
 
         try {
-            const stats = await getStats(type, name);
+            const stats = await getStats(saison, type, name);
 
             if (!stats) {
-                return message.reply(`Aucune statistique trouvée pour **${name}** dans la catégorie **${type}**.`);
+                return message.reply(`Aucune statistique trouvée pour **${name}** (${type}, ${saison}).`);
             }
 
             // Transformer les secondes en minutes et secondes
-            const tempsDeJeuJoueur = formatTime(parseInt(stats[17]));
+            const tempsDeJeuJoueur = formatTime(parseInt(stats[30]));
             const tempsDeJeuEquipe = formatTime(parseInt(stats[20]));
 
             // Création de l'embed
@@ -50,53 +55,70 @@ module.exports = {
                         value:
                             `> **Division :** ${stats[0]}\n` +
                             `> **Équipe :** ${stats[1]}\n` +
-                            `> **Manches jouées :** ${stats[3]}\n` +
-                            `> **Manches gagnées :** ${stats[4]}\n` +
-                            `> **Manches perdues :** ${Number(stats[3]) - Number(stats[4])}\n` +
-                            `> **Ratio V / D :** ${stats[5]}\n` +
+                            `> **Manches jouées :** ${stats[4]}\n` +
+                            `> **Manches gagnées :** ${stats[5]}\n` +
+                            `> **Manches perdues :** ${Number(stats[4]) - Number(stats[5])}\n` +
+                            `> **Taux V / D :** ${stats[6]} - #${stats[7]}\n` +
                             `> **Temps de jeu :** ${tempsDeJeuJoueur}\n`,
+                        inline: true,
+                    },
+                    {
+                        name: `📝 Informations Division ${stats[0]}`,
+                        value:
+                            `> **Nb joueurs dans la div :** ${stats[51]}\n` +
+                            `> **Nb joueurs classés dans la div :** ${stats[50]}`,
+                        inline: true,
+                    },
+                    {
+                        name: '\u200B',
+                        value: '\u200B',
                         inline: false,
                     },
                     {
                         name: '⚔️ Liquidations',
                         value:
-                            `> **Avec assist. :** ${stats[6]}\n` +
-                            `> **Sans assist. :** ${stats[8]}\n` +
-                            `> **Assist. :** ${stats[10]}\n` +
-                            `> **Subies :** ${stats[12]}\n` +
-                            `> **Ratio :** ${stats[14]}\n`,
+                            `> **Avec assist. :** ${stats[8]} - #${stats[9]}\n` +
+                            `> **Sans assist. :** ${stats[12]} - #${stats[13]}\n` +
+                            `> **Assist. :** ${stats[16]} - #${stats[17]}\n` +
+                            `> **Subies :** ${stats[20]} - #${stats[21]}\n` +
+                            `> **Ratio :** ${stats[24]} - #${stats[25]}\n`,
                         inline: true,
                     },
                     {
                         name: '🔫 Par manche',
                         value:
-                            `> **Avec assist. :** ${stats[7]}\n` +
-                            `> **Sans assist. :** ${stats[9]}\n` +
-                            `> **Assist. :** ${stats[11]}\n` +
-                            `> **Subies :** ${stats[13]}\n`,
+                            `> **Avec assist. :** ${stats[10]} - #${stats[11]}\n` +
+                            `> **Sans assist. :** ${stats[14]} - #${stats[15]}\n` +
+                            `> **Assist. :** ${stats[18]} - #${stats[19]}\n` +
+                            `> **Subies :** ${stats[22]} - #${stats[23]}\n`,
                         inline: true,
                     },
                     {
                         name: '⏱️ Par minute',
                         value:
-                            `> **Avec assist. :** ${stats[24]}\n` +
-                            `> **Sans assist. :** ${stats[21]}\n` +
-                            `> **Assist. :** ${stats[23]}\n` +
-                            `> **Subies :** ${stats[22]}\n`,
+                            `> **Avec assist. :** ${stats[42]} - #${stats[43]}\n` +
+                            `> **Sans assist. :** ${stats[36]} - #${stats[37]}\n` +
+                            `> **Assist. :** ${stats[40]} - #${stats[41]}\n` +
+                            `> **Subies :** ${stats[38]} - #${stats[39]}\n`,
                         inline: true,
+                    },
+                    {
+                        name: '\u200B',
+                        value: '\u200B',
+                        inline: false,
                     },
                     {
                         name: '🎯 Divers',
                         value:
-                            `> **Spéciaux :** ${stats[15]}\n` +
-                            `> **Territoire encré :** ${stats[18]}\n`,
+                            `> **Spéciaux :** ${stats[26]} - #${stats[27]}\n` +
+                            `> **Territoire encré :** ${stats[31]} - #${stats[32]}\n`,
                         inline: true,
                     },
                     {
                         name: '⏱️ Par minute',
                         value:
-                            `> **Spéciaux :** ${stats[25]}\n` +
-                            `> **Territoire encré :** ${stats[26]}`,
+                            `> **Spéciaux :** ${stats[44]} - #${stats[45]}\n` +
+                            `> **Territoire encré :** ${stats[46]} - #${stats[47]}\n`,
                         inline: true,
                     }
                 ]
