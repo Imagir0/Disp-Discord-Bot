@@ -26,7 +26,7 @@ module.exports = {
         const type = args[1].toLowerCase();
         const name = args.slice(2).join(' '); // Pour les noms avec espaces
 
-        if (!['s4', 's5'].includes(saison.toLowerCase())) {
+        if (!['s3', 's4', 's5'].includes(saison.toLowerCase())) {
             return message.reply("Veuillez spécifier une saison valide (`S4` ou `S5`).");
         }
 

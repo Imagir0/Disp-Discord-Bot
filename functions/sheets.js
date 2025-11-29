@@ -9,6 +9,7 @@ const auth = new google.auth.GoogleAuth({
 const sheets = google.sheets({ version: 'v4', auth });
 
 // 🗂️ Identifiants des saisons
+const SPREADSHEET_ID_S3 = '16wY60gA588m_32jOpWjPBMTg5JVaa1YJcDd93HyEv1E';
 const SPREADSHEET_ID_S4 = '1JcxiviVfcYPlIWBzVBOh3RAd0m0zgLcu0hV25KJMBYc';
 const SPREADSHEET_ID_S5 = '1XvOUvv2CVSgSHercRIUsahlYNXTxeVdTHzb6bnTzKlM';
 
@@ -21,13 +22,15 @@ async function getStats(saison, type, name) {
   // Nettoyer le texte reçu
   const saisonClean = saison.trim().toLowerCase();
 
-  if (saisonClean === 's4') {
+  if (saisonClean === 's3') {
+    SPREADSHEET_ID = SPREADSHEET_ID_S3;
+  } else if (saisonClean === 's4') {
     SPREADSHEET_ID = SPREADSHEET_ID_S4;
   } else if (saisonClean === 's5') {
     SPREADSHEET_ID = SPREADSHEET_ID_S5;
   } else {
     console.error('Saison reçue :', saison);
-    throw new Error('Saison invalide. Utilisez S4 ou S5.');
+    throw new Error('Saison invalide. Utilisez S3, S4 ou S5.');
   }
 
   // 🟦 Choisir la bonne feuille et colonne selon le type
